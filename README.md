@@ -1,2 +1,3 @@
 # Домашняя работа по курсу Java Developer Professional (OTUS)
-Homeworks for the Java Developer Professional course
+Студент:
+Lymar Sergei (Лымарь Сергей)
