@@ -33,8 +33,15 @@ public class TestClass {
 
     @Test
     public void testMethod3() {
-        TestLauncher<Object> testLauncher = null;
-        testLauncher.launch(new Object());
+        String string = null;
+        string.toLowerCase();
+    }
+
+    @Test
+    public void testMethod4() {
+        String value = "Dasd";
+        String value2 = "Das";
+        Assert.assertEquals(value2, value);
     }
 
     @After
