@@ -32,9 +32,9 @@ public class TestLauncher<T> {
         }
 
         System.out.println("=================[Statistics]=================");
-        System.out.println("Success tests launched: " + successTestMethods);
-        System.out.println("Fail tests launched: " + (totalTestMethods - successTestMethods));
-        System.out.println("Total tests launched: " + totalTestMethods);
+        System.out.println("Success tests: " + successTestMethods);
+        System.out.println("Fail tests: " + (totalTestMethods - successTestMethods));
+        System.out.println("Total tests: " + totalTestMethods);
     }
 
     private void launchBeforeMethods(List<Method> methodsWithBefore, T object) {
