@@ -11,8 +11,15 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TestLauncher<T> {
-    public void launch(T object) {
-        Class<? extends Object> clazz = object.getClass();
+    public void launch(Class<T> clazz) {
+        try {
+            launchInternal(clazz);
+        } catch (Exception exception) {
+            System.out.println("Something was wrong, ex = " + exception.getMessage());
+        }
+    }
+
+    private void launchInternal(Class<T> clazz) throws Exception {
         List<Method> methodsWithBefore = extractMethodsWithBeforeAnnotation(clazz);
         List<Method> methodsWithTest = extractMethodsWithTestAnnotation(clazz);
         List<Method> methodsWithAfter = extractMethodsWithAfterAnnotation(clazz);
@@ -21,44 +28,34 @@ public class TestLauncher<T> {
         int successTestMethods = 0;
 
         for (Method method : methodsWithTest) {
-            launchBeforeMethods(methodsWithBefore, object);
+            T object = resetState(clazz);
+            launchMethods(methodsWithBefore, object);
+
             try {
                 method.invoke(object);
                 successTestMethods += 1;
             } catch (Exception exception) {
-                System.out.println("Something was wrong, ex = " + exception.getMessage());
+                System.out.println("Exception in test method = [" + method.getName() + "]");
             }
-            launchAfterMethods(methodsWithAfter, object);
+
+            launchMethods(methodsWithAfter, object);
         }
 
-        System.out.println("=================[Statistics]=================");
-        System.out.println("Success tests: " + successTestMethods);
-        System.out.println("Fail tests: " + (totalTestMethods - successTestMethods));
-        System.out.println("Total tests: " + totalTestMethods);
+       printStatistic(totalTestMethods, successTestMethods);
     }
 
-    private void launchBeforeMethods(List<Method> methodsWithBefore, T object) {
-        try {
-            methodsWithBefore.forEach(methodWithBefore -> {
-                try {
-                    methodWithBefore.invoke(object);
-                } catch (Exception exception) {
-                    System.out.println("Something was wrong, ex = " + exception.getMessage());
-                }
-            });
-        } catch (Exception exception) {
-            System.out.println("Something was wrong, ex = " + exception.getMessage());
-        }
-    }
-
-    private void launchAfterMethods(List<Method> methodsWithAfter, T object) {
+    private void launchMethods(List<Method> methodsWithAfter, T object) {
         methodsWithAfter.forEach(methodWithAfter -> {
             try {
                 methodWithAfter.invoke(object);
             } catch (Exception exception) {
-                System.out.println("Something was wrong, ex = " + exception.getMessage());
+                throw new RuntimeException(exception);
             }
         });
+    }
+
+    private T resetState(Class<T> clazz) throws Exception {
+        return clazz.getConstructor().newInstance();
     }
 
     private List<Method> extractMethodsWithBeforeAnnotation(Class<? extends Object> testClass) {
@@ -113,5 +110,12 @@ public class TestLauncher<T> {
                             });
                 });
         return methodsWithAnnotation;
+    }
+
+    private void printStatistic(int total, int success) {
+        System.out.println("=================[Statistics]=================");
+        System.out.println("Success tests: " + success);
+        System.out.println("Fail tests: " + (total - success));
+        System.out.println("Total tests: " + total);
     }
 }
